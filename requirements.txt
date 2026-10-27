@@ -1,0 +1,10 @@
+# 本项目运行依赖。
+# 安装：pip install -r requirements.txt
+#
+# 添加依赖时请锁定版本，例如：
+# requests==<版本>
+# python-dotenv==<版本>
+#
+# 开发工具（需要时取消注释）
+# pytest==<版本>
+# ruff==<版本>
