@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="/common/bootstrap4/css/bootstrap.min.css"/>
+
+
+    <link rel="stylesheet" href="/common/bootstrap4/icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="/common/js/lightbox/css/lightbox.css">
+
+    <!-- bootstrap需要jQuery -->
+    <script src="/common/js/jquery-1.9.1.min.js"></script>
+    <script src="/common/bootstrap4/js/bootstrap.min.js"></script>
+
+    <script src="/common/js/lightbox/js/lightbox.js"></script>
+
+    <script src="https://img.iduodou.com/images/web/js/vue.min.v3.2.31.js"></script>
+    <script src="/common/js/vue-cookies.js"></script>
+    <script src="/common/js/axios.min.js"></script>
+
+    <script src="/common/js/common.js"></script>
+    <script src="/common/js/layer/layer.js"></script>
+    <script src="/common/js/clipboard.min.js"></script>
+    <script src="/common/js/clipboard-polyfill.promise.js"></script>
+
+    <script src="https://res.wx.qq.com/open/js/jweixin-1.3.2.js"></script>
+
+    <script src="/common/js/jsQR.js"></script>
+    <script src="/common/js/jquery-qrcode-0.18.0.min.js"></script>
+    <title>打开小程序</title>
+    <link rel="shortcut icon" type="image/ico" href="/jielong/images/logo.png">
+    <style type="text/css">
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #F7F7F7;
+            font-size: 18px;
+        }
+
+        .container {
+            padding-top: 40px;
+        }
+
+        .xcx_name {
+            text-align: center;
+            font-size: 24px;
+        }
+
+        a:link{
+            text-decoration: none;
+        }
+
+        .sure_btn {
+            background: #FFFFFF;
+            display: flex;
+            align-items: center;
+            border: 0;
+            width: 100%;
+            padding: 24px 0;
+            border-radius: 8px;
+            margin-top: 40px;
+            box-shadow: 0 0 8px #eeeeee;
+        }
+
+        .logo {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            margin-left: 20px;
+        }
+
+        .text {
+            margin-left: 10px;
+            color: #333333;
+        }
+
+        .tips {
+            font-size: 17px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .sub_tips {
+            font-size: 14px;
+            color: #555555;
+            text-align: left;
+            margin-top: 3px;
+            font-weight: 300;
+        }
+
+        .rg_icon {
+            width: 26px;
+            height: 26px;
+            opacity: .6;
+            margin-left: auto;
+            margin-right: 20px;
+        }
+
+        .sure_btn:focus {
+            outline: none;
+        }
+
+        .qr_code {
+            width: 380px;
+            background: #FFFFFF;
+            border-radius: 8px;
+            margin: 20px auto;
+            padding: 40px 0;
+            box-shadow: 0 4px 6px 0 rgba(0,0,0,.08);
+        }
+
+        .code_title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 20px;
+        }
+
+        .code_img {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .code {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .logo_icon {
+            display: block;
+            width: 70px;
+            height: 70px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            border-radius: 50%;
+            border: 6px solid #FFFFFF;
+        }
+
+        .code_tips {
+            width: 300px;
+            margin: 20px auto 0;
+            text-align: center;
+            font-size: 16px;
+            color: #888888;
+        }
+
+        .canvas {
+            position: fixed;
+            left: -10000px;
+            bottom: -10000px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="content">
+        <div class="container">
+            <div class="xcx_name">{{name}}</div>
+            <a :href="xcxLink" @click="gotoMiniProgram" class="sure_btn" v-if="isMobile && !isAliApp">
+                <img class="logo" :src="'/qrcode/images/logo.png'"/>
+                <div class="text">
+                    <div class="tips">附件1：“电信杯”TeleAgent高校AI创新大赛参赛报名表.xlsx</div>
+                    <div class="sub_tips">前往小程序查看</div>
+                </div>
+                <img class="rg_icon" src="/jielong/images/right.png"/>
+            </a>
+
+            <div class="qr_code" v-if="!isMobile || isAliApp">
+                <div class="code_title">附件1：“电信杯”TeleAgent高校AI创新大赛参赛报名表.xlsx</div>
+                <div class="code_img">
+                    <img class="code" :src="codeUrl"/>
+                    <img class="logo_icon" src="/qrcode/images/logo.png"/>
+                </div>
+                <div class="code_tips">使用微信扫一扫，即可查看/下载文件</div>
+            </div>
+        </div>
+    </div>
+
+    <canvas class="canvas" id="qrCodeCanvas" width="660" height="660"></canvas>
+</div>
+
+</body>
+<script type="application/javascript">
+    let baseUrl = 'https://wx.vimbao.cn';
+    axios.defaults.withCredentials = true;
+    axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+    const app = Vue.createApp({
+        data() {
+            return {
+                xcx: 'cdoc',
+                name: '识码查看',
+                xcxLink: '',
+                codeUrl: '',
+                isMobile: true,
+                isAliApp: false
+            }
+        },
+        mounted() {
+            let param = this.getXcxParam();
+            this.xcx = param['xcx'];
+            this.name = param['name'];
+            this.xcxLink = 'weixin://dl/business/?appid=' + param['appId'] + '&path=' + param['path'] + '&query=' + param['query'] + '&env_version=release';
+            //是否移动端
+            this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            //是否支付宝
+            this.isAliApp = /AliApp/i.test(navigator.userAgent);
+            this.initQrCode();
+        },
+        methods: {
+            initQrCode: function() {
+                let pathname = window.location.pathname;
+                let url = baseUrl + pathname;
+                this.codeUrl = this.getViewCodeUrl(url);
+            },
+            //获取小程序跳转参数
+            getXcxParam: function() {
+                let pathname = window.location.pathname;
+                let pathArr = pathname.split('/');
+                let xcx = 'cdoc', name = '识码查看';
+                let appId = 'wxa28ae072b0420588';
+                let path = 'pages/index/index';
+                let query = '';
+
+                if (pathArr.length > 2) {
+                    let path1 = pathArr[1];
+                    let path2 = pathArr[2];
+                    if (path1 == 's') {
+                        path = 'pages/detail/detail';
+                        query = encodeURIComponent('uuid=' + path2);
+                    }
+                }
+                return { appId, path, query, xcx, name };
+            },
+            getViewCodeUrl: function (text) {
+                let canvas = $("#qrCodeCanvas")[0];
+                let ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                $("#qrCodeCanvas").qrcode({
+                    render: 'canvas',
+                    text: text,
+                    mode: 4,
+                    size: 600,
+                    left: 30,
+                    top: 30,
+                    background: '#FFFFFF'
+                });
+
+                let base64Url = canvas.toDataURL("image/png");
+                return base64Url;
+            },
+        }
+    }).mount('#app');
+</script>
+</html>
